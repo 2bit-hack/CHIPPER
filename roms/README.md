@@ -1,5 +1,5 @@
 These ROMs belong in the public domain, and have thus been distributed along with this project.
-They have been sourced from [Zophar's Domain](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html)
+They have been sourced from [Zophar's Domain](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html).
 
 The ROMs included are as follows:
 
