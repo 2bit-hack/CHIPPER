@@ -3,7 +3,8 @@
 
 #define ROM_LOAD_ERR -1
 
-using byte = unsigned char;
+using Byte = unsigned char;
+using Opcode = unsigned short;
 
 #include <fstream>
 #include <iostream>
@@ -11,11 +12,11 @@ using byte = unsigned char;
 #include <vector>
 
 class Chip {
-
   public:
-    std::vector<byte> m_memory;
-    std::vector<byte> m_registers;
-    std::vector<byte> m_stack;
+    std::vector<Byte> m_memory;
+    int m_programCounter;
+    std::vector<Byte> m_registers;
+    std::vector<Byte> m_stack;
     int m_stackPointer;
     std::vector<bool> m_keys;
     std::vector<bool> m_frameBuffer;
@@ -25,7 +26,7 @@ class Chip {
     Chip();
 
     void loadROM(std::string filepath);
-    void run();
+    void play();
 };
 
 #endif

@@ -5,5 +5,10 @@ int main() {
     Chip* chip = new Chip();
     chip->loadROM(filepath);
 
+    // It works!
+    // chip->m_memory[0] = 0xab;
+    // chip->m_memory[1] = 0xcd;
+    // chip->play();
+
     return 0;
 }
