@@ -1,14 +1,18 @@
 #ifndef CHIP_HPP
 #define CHIP_HPP
 
+#define ROM_LOAD_ERR -1
+
 using byte = unsigned char;
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
 class Chip {
 
+  public:
     std::vector<byte> m_memory;
     std::vector<byte> m_registers;
     std::vector<byte> m_stack;

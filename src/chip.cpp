@@ -1,6 +1,6 @@
 #include "../includes/chip.hpp"
 
-// used to initialize and reset the system
+// initialize or reset the CHIP-8 system
 Chip::Chip() {
     m_memory.clear();
     m_memory.resize(4096);
@@ -21,4 +21,25 @@ Chip::Chip() {
 
     m_delayTimer = 0;
     m_soundTimer = 0;
+}
+
+// load a ROM into CHIP-8 memory
+void Chip::loadROM(std::string filepath) {
+    // reads rom as a binary file
+    // set read pointer at the end to get size in bytes
+    // and store in romSize
+    size_t romSize;
+    std::ifstream rom(filepath,
+                      std::ios::in | std::ios::binary | std::ios::ate);
+    if (rom.is_open()) {
+        romSize = rom.tellg();
+        rom.seekg(0, std::ios::beg);
+        // hacky conversion of vector<unsigned char> to char*
+        rom.read((char*)&m_memory[0], romSize);
+        std::cout << "File size: " << romSize << "\n";
+        rom.close();
+    } else {
+        std::cerr << "Failed to load ROM\n";
+        exit(ROM_LOAD_ERR);
+    }
 }
