@@ -28,6 +28,7 @@ class Chip {
 
     void debug_dumpMem();
 
+    void loadFont();
     bool loadROM(std::string filepath);
     void play();
 };

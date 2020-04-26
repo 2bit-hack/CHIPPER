@@ -5,7 +5,9 @@ Chip::Chip() {
     m_memory.clear();
     m_memory.resize(4096);
 
-    m_programCounter = 0;
+    loadFont();
+
+    m_programCounter = 0x0200; // 512 bytes
     m_indexRegister = 0;
 
     m_registers.clear();
@@ -20,16 +22,17 @@ Chip::Chip() {
     m_keys.resize(16);
 
     m_frameBuffer.clear();
+    // 32 rows, 64 cols
     m_frameBuffer.resize(32 * 64);
 
     m_delayTimer = 0;
     m_soundTimer = 0;
 }
 
-// dumps contents of memory from 512 bytes onwards to stdout
+// dumps contents of memory to stdout
 // useful for quickly checking opcodes in a certain ROM
 void Chip::debug_dumpMem() {
-    for (int i = 512; i < 4096; i++) {
+    for (int i = 0x0000; i <= 0x0FFF; i++) {
         std::cout << std::dec << i << " : " << std::hex << (int)m_memory[i]
                   << " ";
         if (i % 8 == 0)
@@ -38,7 +41,36 @@ void Chip::debug_dumpMem() {
     std::cout << "\n";
 }
 
+// load CHIP-8 fontset into memory
+// memory from 0 to 512 is basically empty, so we use the first 80 bytes to
+// store this
+void Chip::loadFont() {
+    // http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
+    Byte chip8_fontset[80] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    };
+    for (int i = 0x0000; i <= 0x0050; i++) {
+        m_memory[i] = chip8_fontset[i];
+    }
+}
+
 // load a ROM into CHIP-8 memory
+// we start loading the ROM from the 512th byte onwards
 bool Chip::loadROM(std::string filepath) {
     // reads rom as a binary file
     size_t romSize;
