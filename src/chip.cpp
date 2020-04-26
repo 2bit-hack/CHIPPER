@@ -7,6 +7,9 @@ Chip::Chip() {
 
     loadFont();
 
+    // setting up rng for opcode 0xCXNN
+    srand(time(NULL));
+
     m_programCounter = 0x0200; // 512 bytes
     m_indexRegister = 0;
 
@@ -96,6 +99,8 @@ bool Chip::loadROM(std::string filepath) {
 void Chip::play() {
 
     // utility variables
+    unsigned short randomNumber; // really only needs 1 byte, but unsigned short
+                                 // for consistency
     unsigned short N;
     unsigned short NN;
     unsigned short NNN;
@@ -135,6 +140,7 @@ void Chip::play() {
             std::cerr << "Illegal opcode encountered! " << std::hex
                       << (int)opcode << std::dec << "\n";
             exit(ILLEGAL_OPCODE_ERR);
+            break;
         }
         break;
     case 0x1000:
@@ -343,19 +349,45 @@ void Chip::play() {
         // 9XY0
         // Skips the next instruction if VX doesn't equal VY (Usually the
         // next instruction is a jump to skip a code block)
+
+        X = (opcode & 0x0F00) >> 8;
+        Y = (opcode & 0x00F0) >> 4;
+        if (m_registers[X] != m_registers[Y])
+            m_programCounter += 4;
+        else
+            m_programCounter += 2;
+
         break;
     case 0xA000:
         // ANNN
         // Sets I to the address NNN
+
+        NNN = opcode & 0x0FFF;
+        m_indexRegister = NNN;
+        m_programCounter += 2;
+
         break;
     case 0xB000:
         // BNNN
         // Jumps to the address NNN plus V0
+
+        NNN = opcode & 0x0FFF;
+        m_programCounter = NNN + m_registers[0x0000];
+
         break;
     case 0xC000:
         // CXNN
         // Sets VX to the result of a bitwise and operation on a random
         // number (Typically: 0 to 255) and NN
+
+        X = (opcode & 0x0F00) >> 8;
+        NN = opcode & 0x00FF;
+        // usually, rand() should be avoided
+        // might change to more "true" rng later
+        randomNumber = rand() % 256;
+        m_registers[X] = randomNumber & NN;
+        m_programCounter += 2;
+
         break;
     case 0xD000:
         // DXYN
