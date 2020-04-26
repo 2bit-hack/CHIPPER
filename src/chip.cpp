@@ -27,6 +27,8 @@ Chip::Chip() {
 
     m_delayTimer = 0;
     m_soundTimer = 0;
+
+    g.drawFrameBuffer();
 }
 
 // dumps contents of memory to stdout

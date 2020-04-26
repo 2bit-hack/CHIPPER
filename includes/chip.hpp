@@ -11,8 +11,12 @@ using Opcode = unsigned short;
 #include <string>
 #include <vector>
 
+#include "./graphics.hpp"
+
 class Chip {
   public:
+    friend class Graphics;
+
     std::vector<Byte> m_memory;
     int m_programCounter;
     int m_indexRegister;
@@ -23,6 +27,7 @@ class Chip {
     std::vector<bool> m_frameBuffer;
     int m_delayTimer;
     int m_soundTimer;
+    Graphics g;
 
     Chip();
 
