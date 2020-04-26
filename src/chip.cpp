@@ -22,13 +22,12 @@ Chip::Chip() {
     m_keys.resize(16);
 
     m_frameBuffer.clear();
-    // 32 rows, 64 cols
-    m_frameBuffer.resize(32 * 64);
+    m_frameBuffer.resize(64 * 32);
 
     m_delayTimer = 0;
     m_soundTimer = 0;
 
-    g.drawFrameBuffer();
+    m_drawFlag = false;
 }
 
 // dumps contents of memory to stdout
@@ -107,10 +106,20 @@ void Chip::play() {
         case 0x00E0:
             // 00E0
             // Clears the screen
+
+            for (int i = 0; i < 64 * 32; i++) {
+                m_frameBuffer[i] = false;
+            }
+            m_drawFlag = true;
+            m_programCounter += 2;
+
             break;
         case 0x00EE:
             // 00EE
             // Returns from a subroutine
+
+            m_programCounter = m_stack[--m_stackPointer];
+
             break;
         default:
             std::cerr << "Illegal opcode encountered!\n";

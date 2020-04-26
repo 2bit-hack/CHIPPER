@@ -1,7 +1,7 @@
 CC=g++
 
-all: main.o chip.o graphics.o
-	$(CC) -o chip main.o chip.o graphics.o -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system
+all: main.o chip.o
+	$(CC) -o chip main.o chip.o
 
 main.o:
 	$(CC) -c src/main.cpp
@@ -9,10 +9,7 @@ main.o:
 chip.o:
 	$(CC) -c src/chip.cpp
 
-graphics.o:
-	$(CC) -c src/graphics.cpp
-
 .PHONY: clean
 
 clean:
-	rm -f chip main.o chip.o graphics.o
+	rm -f chip main.o chip.o
