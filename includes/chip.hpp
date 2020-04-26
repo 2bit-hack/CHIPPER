@@ -2,6 +2,7 @@
 #define CHIP_HPP
 
 #define ROM_LOAD_ERR -1
+#define ILLEGAL_OPCODE_ERR -2
 
 using Byte = unsigned char;
 using Opcode = unsigned short;

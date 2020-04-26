@@ -46,6 +46,7 @@ void Chip::debug_dumpMem() {
 // memory from 0 to 512 is basically empty, so we use the first 80 bytes to
 // store this
 void Chip::loadFont() {
+    // font taken from
     // http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
     Byte chip8_fontset[80] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -81,7 +82,7 @@ bool Chip::loadROM(std::string filepath) {
         romSize = rom.tellg();
         rom.seekg(0, std::ios::beg);
         // hacky conversion of vector<unsigned char> to char*
-        rom.read((char*)&m_memory[512], romSize);
+        rom.read((char*)&m_memory[0x0200], romSize);
         rom.close();
         return true;
     } else {
@@ -93,6 +94,14 @@ bool Chip::loadROM(std::string filepath) {
 
 // fetch, decode, execute
 void Chip::play() {
+
+    // utility variables
+    unsigned short N;
+    unsigned short NN;
+    unsigned short NNN;
+    unsigned short X;
+    unsigned short Y;
+
     // fetch
     // get two bytes from memory according to the program counter
     Opcode opcode = (Opcode)((m_memory[m_programCounter] << 8) |
@@ -119,91 +128,215 @@ void Chip::play() {
             // Returns from a subroutine
 
             m_programCounter = m_stack[--m_stackPointer];
+            m_programCounter += 2;
 
             break;
         default:
-            std::cerr << "Illegal opcode encountered!\n";
+            std::cerr << "Illegal opcode encountered! " << std::hex
+                      << (int)opcode << std::dec << "\n";
+            exit(ILLEGAL_OPCODE_ERR);
         }
         break;
     case 0x1000:
         // 1NNN
         // Jumps to address NNN
+
+        NNN = opcode & 0x0FFF;
+        m_programCounter = NNN;
+
         break;
     case 0x2000:
         // 2NNN
         // Calls subroutine at NNN
+
+        NNN = opcode & 0x0FFF;
+        m_stack[m_stackPointer] = m_programCounter;
+        m_programCounter = NNN;
+
         break;
     case 0x3000:
         // 3XNN
         // Skips the next instruction if VX equals NN (Usually the next
         // instruction is a jump to skip a code block)
+
+        X = (opcode & 0x0F00) >> 8;
+        NN = opcode & 0x00FF;
+        if (m_registers[X] == NN)
+            m_programCounter += 4;
+        else
+            m_programCounter += 2;
+
         break;
     case 0x4000:
         // 4XNN
         // Skips the next instruction if VX doesn't equal NN (Usually the
         // next instruction is a jump to skip a code block)
+
+        X = (opcode & 0x0F00) >> 8;
+        NN = opcode & 0x00FF;
+        if (m_registers[X] != NN)
+            m_programCounter += 4;
+        else
+            m_programCounter += 2;
+
         break;
     case 0x5000:
         // 5XY0
         // Skips the next instruction if VX equals VY (Usually the next
         // instruction is a jump to skip a code block)
+
+        X = (opcode & 0x0F00) >> 8;
+        Y = (opcode & 0x00F0) >> 4;
+        if (m_registers[X] == m_registers[Y])
+            m_programCounter += 4;
+        else
+            m_programCounter += 2;
+
         break;
     case 0x6000:
         // 6XNN
         // Sets VX to NN
+
+        X = (opcode & 0x0F00) >> 8;
+        NN = opcode & 0x00FF;
+        m_registers[X] = NN;
+        m_programCounter += 2;
+
         break;
     case 0x7000:
         // 7XNN
         // Adds NN to VX (Carry flag is not changed)
+
+        X = (opcode & 0x0F00) >> 8;
+        NN = opcode & 0x00FF;
+        m_registers[X] += NN;
+        m_programCounter += 2;
+
         break;
     case 0x8000:
         switch (opcode & 0x000F) {
         case 0x0000:
             // 8XY0
             // Sets VX to the value of VY
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            m_registers[X] = m_registers[Y];
+            m_programCounter += 2;
+
             break;
         case 0x0001:
             // 8XY1
             // Sets VX to VX or VY (Bitwise OR operation)
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            m_registers[X] = m_registers[X] | m_registers[Y];
+            m_registers[0x000F] = 0;
+            m_programCounter += 2;
+
             break;
         case 0x0002:
             // 8XY2
             // Sets VX to VX and VY (Bitwise AND operation)
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            m_registers[X] = m_registers[X] & m_registers[Y];
+            m_registers[0x000F] = 0;
+            m_programCounter += 2;
+
             break;
         case 0x0003:
             // 8XY3
             // Sets VX to VX xor VY
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            m_registers[X] = m_registers[X] ^ m_registers[Y];
+            m_registers[0x000F] = 0;
+            m_programCounter += 2;
+
             break;
         case 0x0004:
             // 8XY4
             // Adds VY to VX
             // VF is set to 1 when there's a carry, and to 0
             // when there isn't
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            if (m_registers[X] + m_registers[Y] > 0x00FF)
+                m_registers[0x000F] = 1;
+            else
+                m_registers[0x000F] = 0;
+            m_registers[X] = (Byte)(m_registers[X] + m_registers[Y]);
+            m_programCounter += 2;
+
             break;
         case 0x0005:
             // 8XY5
             // VY is subtracted from VX
             // VF is set to 0 when there's a
             // borrow, and 1 when there isn't
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            if (m_registers[X] < m_registers[Y])
+                m_registers[0x000F] = 0;
+            else
+                m_registers[0x000F] = 1;
+            m_registers[X] = (Byte)(m_registers[X] - m_registers[Y]);
+            m_programCounter += 2;
+
             break;
         case 0x0006:
             // 8XY6
             // Stores the least significant bit of VX in VF and then shifts
             // VX to the right by 1
+
+            X = (opcode & 0x0F00) >> 8;
+            // Y is never used for some reason
+            Y = (opcode & 0x00F0) >> 4;
+            m_registers[0x000F] = m_registers[X] & 0x0001;
+            m_registers[X] = (Byte)m_registers[X] >> 1;
+            m_programCounter += 2;
+
             break;
         case 0x0007:
             // 8XY7
             // Sets VX to VY minus VX
             // VF is set to 0 when there's a borrow,
             // and 1 when there isn't
+
+            X = (opcode & 0x0F00) >> 8;
+            Y = (opcode & 0x00F0) >> 4;
+            if (m_registers[Y] < m_registers[X])
+                m_registers[0x000F] = 0;
+            else
+                m_registers[0x000F] = 1;
+            m_registers[X] = (Byte)(m_registers[Y] - m_registers[X]);
+            m_programCounter += 2;
+
             break;
         case 0x000E:
             // 8XYE
             // Stores the most significant bit of VX in VF and then shifts VX
             // to the left by 1
+
+            X = (opcode & 0x0F00) >> 8;
+            // Again, Y is not used
+            Y = (opcode & 0x00F0) >> 4;
+            m_registers[0x000F] = (m_registers[X] & 0x0080) >> 7;
+            m_registers[X] = (Byte)(m_registers[X] << 1);
+            m_programCounter += 2;
+
             break;
         default:
-            std::cerr << "Illegal opcode encountered!\n";
+            std::cerr << "Illegal opcode encountered! " << std::hex
+                      << (int)opcode << std::dec << "\n";
+            exit(ILLEGAL_OPCODE_ERR);
+            break;
         }
         break;
     case 0x9000:
@@ -248,7 +381,10 @@ void Chip::play() {
             // a code block)
             break;
         default:
-            std::cerr << "Illegal opcode encountered!\n";
+            std::cerr << "Illegal opcode encountered! " << std::hex
+                      << (int)opcode << std::dec << "\n";
+            exit(ILLEGAL_OPCODE_ERR);
+            break;
         }
         break;
     case 0xF000:
@@ -281,7 +417,10 @@ void Chip::play() {
                 // 1 for each value written, but I itself is left unmodified
                 break;
             default:
-                std::cerr << "Illegal opcode encountered!\n";
+                std::cerr << "Illegal opcode encountered! " << std::hex
+                          << (int)opcode << std::dec << "\n";
+                exit(ILLEGAL_OPCODE_ERR);
+                break;
             }
             break;
         case 0x0008:
@@ -308,10 +447,16 @@ void Chip::play() {
             // location I+1, and the ones digit at location I+2.)
             break;
         default:
-            std::cerr << "Illegal opcode encountered!\n";
+            std::cerr << "Illegal opcode encountered! " << std::hex
+                      << (int)opcode << std::dec << "\n";
+            exit(ILLEGAL_OPCODE_ERR);
+            break;
         }
         break;
     default:
-        std::cerr << "Illegal opcode encountered!\n";
+        std::cerr << "Illegal opcode encountered! " << std::hex << (int)opcode
+                  << std::dec << "\n";
+        exit(ILLEGAL_OPCODE_ERR);
+        break;
     }
 }
