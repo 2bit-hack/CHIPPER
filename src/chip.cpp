@@ -6,6 +6,7 @@ Chip::Chip() {
     m_memory.resize(4096);
 
     m_programCounter = 0;
+    m_indexRegister = 0;
 
     m_registers.clear();
     m_registers.resize(16);
@@ -25,8 +26,20 @@ Chip::Chip() {
     m_soundTimer = 0;
 }
 
+// dumps contents of memory from 512 bytes onwards to stdout
+// useful for quickly checking opcodes in a certain ROM
+void Chip::debug_dumpMem() {
+    for (int i = 512; i < 4096; i++) {
+        std::cout << std::dec << i << " : " << std::hex << (int)m_memory[i]
+                  << " ";
+        if (i % 8 == 0)
+            std::cout << "\n";
+    }
+    std::cout << "\n";
+}
+
 // load a ROM into CHIP-8 memory
-void Chip::loadROM(std::string filepath) {
+bool Chip::loadROM(std::string filepath) {
     // reads rom as a binary file
     size_t romSize;
     std::ifstream rom(filepath,
@@ -35,12 +48,13 @@ void Chip::loadROM(std::string filepath) {
         romSize = rom.tellg();
         rom.seekg(0, std::ios::beg);
         // hacky conversion of vector<unsigned char> to char*
-        rom.read((char*)&m_memory[0], romSize);
+        rom.read((char*)&m_memory[512], romSize);
         rom.close();
+        return true;
     } else {
         std::cerr << "Failed to load ROM\n";
         // TODO: cleanup if necessary
-        exit(ROM_LOAD_ERR);
+        return false;
     }
 }
 

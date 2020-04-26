@@ -15,6 +15,7 @@ class Chip {
   public:
     std::vector<Byte> m_memory;
     int m_programCounter;
+    int m_indexRegister;
     std::vector<Byte> m_registers;
     std::vector<Byte> m_stack;
     int m_stackPointer;
@@ -25,7 +26,9 @@ class Chip {
 
     Chip();
 
-    void loadROM(std::string filepath);
+    void debug_dumpMem();
+
+    bool loadROM(std::string filepath);
     void play();
 };
 

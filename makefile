@@ -1,6 +1,3 @@
-IDIR=includes/
-SDIR=src/
-
 CC=g++
 
 all: main.o chip.o
