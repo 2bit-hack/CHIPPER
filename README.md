@@ -3,7 +3,10 @@
 A CHIP-8 interpreter written in C++ and SFML
 
 [pong][pong]
-[pong]: https://github.com/2bit-hack/CHIPPER/img/pong.png
+[pong]: https://github.com/2bit-hack/CHIPPER/blob/master/img/pong.png
+
+[blinky][blinky]
+[blinky]: https://github.com/2bit-hack/CHIPPER/blob/master/img/blinky.png
 
 ## Work In Progress
 
