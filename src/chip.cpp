@@ -389,7 +389,7 @@ void Chip::play() {
         m_programCounter += 2;
 
         break;
-    case 0xD000:
+    case 0xD000: {
         // DXYN
         // Draws a sprite at coordinate (VX, VY) that has a width of 8
         // pixels and a height of N pixels. Each row of 8 pixels is read as
@@ -397,7 +397,46 @@ void Chip::play() {
         // after the execution of this instruction. As described above, VF
         // is set to 1 if any screen pixels are flipped from set to unset
         // when the sprite is drawn, and to 0 if that doesn’t happen
-        break;
+
+        X = (opcode & 0x0F00) >> 8;
+        Y = (opcode & 0x00F0) >> 4;
+        N = opcode & 0x000F;
+        Byte x = m_registers[X];
+        Byte y = m_registers[Y];
+        Byte height = N;
+        Byte width = 8;
+        Byte pixelRow;
+        // if no collisions, this will remain 0
+        m_registers[0x000F] = 0;
+        for (int i = 0; i < height; i++) {
+            pixelRow = m_memory[m_indexRegister + i];
+            for (int j = 0; j < width; j++) {
+                // finding the x,y coordinate in the 1D framebuffer
+                // row major
+                int mapXYto1DArr = x + j + ((y + i) * 64);
+                // get each pixel in pixelRow
+                // 128b10 = 10000000b2
+                // we right shift from 0 to 7 to get each bit
+                if ((pixelRow & (0x0080 >> j)) != 0) {
+                    if (m_frameBuffer[mapXYto1DArr]) {
+                        // xor mode drawing
+                        // if that pixel is 1, then collision occurs
+                        // (both pixels are 1)
+                        // and the pixel is xor'd to 0
+                        // we set VF to 1
+                        m_registers[0x000F] = 1;
+                    }
+                    m_frameBuffer[mapXYto1DArr] =
+                        (bool)m_frameBuffer[mapXYto1DArr] ^ 1;
+                }
+            }
+        }
+        m_drawFlag = true;
+        m_programCounter += 2;
+
+    }
+
+    break;
     case 0xE000:
         switch (opcode & 0x000F) {
         case 0x000E:
@@ -405,12 +444,26 @@ void Chip::play() {
             // Skips the next instruction if the key stored in VX is
             // pressed. (Usually the next instruction is a jump to skip
             // a code block)
+
+            X = (opcode & 0x0F00) >> 8;
+            if (m_keys[m_registers[X]])
+                m_programCounter += 4;
+            else
+                m_programCounter += 2;
+
             break;
         case 0x0001:
             // EXA1
             // Skips the next instruction if the key stored in VX isn't
             // pressed. (Usually the next instruction is a jump to skip
             // a code block)
+
+            X = (opcode & 0x0F00) >> 8;
+            if (!m_keys[m_registers[X]])
+                m_programCounter += 4;
+            else
+                m_programCounter += 2;
+
             break;
         default:
             std::cerr << "Illegal opcode encountered! " << std::hex
@@ -424,29 +477,67 @@ void Chip::play() {
         case 0x0007:
             // FX07
             // Sets VX to the value of the delay timer
+
+            X = (opcode & 0x0F00) >> 8;
+            m_registers[X] = m_delayTimer;
+            m_programCounter += 2;
+
             break;
-        case 0x000A:
+        case 0x000A: {
             // FX0A
             // A key press is awaited, and then stored in VX. (Blocking
             // Operation. All instruction halted until next key event)
-            break;
+
+            X = (opcode & 0x0F00) >> 8;
+            bool isKeyPressed = false;
+            while (!isKeyPressed) {
+                for (int i = 0; i < 16; i++) {
+                    if (m_keys[i]) {
+                        m_registers[X] = (Byte)i;
+                        isKeyPressed = true;
+                    }
+                }
+            }
+            m_programCounter += 2;
+        }
+
+        break;
         case 0x0005:
             switch (opcode & 0x00F0) {
             case 0x0010:
                 // FX15
                 // Sets the delay timer to VX
+
+                X = (opcode & 0x0F00) >> 8;
+                m_delayTimer = m_registers[X];
+                m_programCounter += 2;
+
                 break;
             case 0x0050:
                 // FX55
                 // Stores V0 to VX (including VX) in memory starting at
                 // address I. The offset from I is increased by 1 for each
                 // value written, but I itself is left unmodified
+
+                X = (opcode & 0x0F00) >> 8;
+                for (int i = 0; i <= (int)X; i++) {
+                    m_memory[m_indexRegister + i] = m_registers[i];
+                }
+                m_programCounter += 2;
+
                 break;
             case 0x0060:
                 // FX65
                 // Fills V0 to VX (including VX) with values from memory
                 // starting at address I. The offset from I is increased by
                 // 1 for each value written, but I itself is left unmodified
+
+                X = (opcode & 0x0F00) >> 8;
+                for (int i = 0; i <= (int)X; i++) {
+                    m_registers[i] = m_memory[m_indexRegister + i];
+                }
+                m_programCounter += 2;
+
                 break;
             default:
                 std::cerr << "Illegal opcode encountered! " << std::hex
@@ -458,11 +549,25 @@ void Chip::play() {
         case 0x0008:
             // FX18
             // Sets the sound timer to VX
+
+            X = (opcode & 0x0F00) >> 8;
+            m_soundTimer = m_registers[X];
+            m_programCounter += 2;
+
             break;
         case 0x000E:
             // FX1E
             // Adds VX to I. VF is set to 1 when there is a range overflow
             // (I+VX>0xFFF), and to 0 when there isn't
+
+            X = (opcode & 0x0F00) >> 8;
+            m_registers[0x000F] = 0;
+            if (m_indexRegister + m_registers[X] > 0x0FFF)
+                m_registers[0x000F] = 1;
+            m_indexRegister =
+                (unsigned short)(m_indexRegister + m_registers[X]);
+            m_programCounter += 2;
+
             break;
         case 0x0009:
             // FX29
@@ -491,4 +596,6 @@ void Chip::play() {
         exit(ILLEGAL_OPCODE_ERR);
         break;
     }
+
+    // TODO: Timer updates
 }
