@@ -45,6 +45,7 @@ void Chip::debug_dumpMem() {
     std::cout << "\n";
 }
 
+// prints out useful information regarding the state of the machine
 void Chip::debug_instructions(Opcode opcode) {
     std::cout << "Opcode: " << std::hex << opcode << std::dec << "\n";
     std::cout << "PC: " << std::hex << m_programCounter << std::dec << "\n";
@@ -97,7 +98,6 @@ bool Chip::loadROM(std::string filepath) {
         return true;
     } else {
         std::cerr << "Failed to load ROM\n";
-        exit(ROM_LOAD_ERR);
         return false;
     }
 }
@@ -119,7 +119,7 @@ void Chip::play() {
     Opcode opcode = (Opcode)((m_memory[m_programCounter] << 8) |
                              m_memory[m_programCounter + 1]);
 
-    debug_instructions(opcode);
+    // debug_instructions(opcode);
 
     // decode and execute
     // get first nibble (half a byte, same as a single hex char)
