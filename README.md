@@ -2,13 +2,34 @@
 
 A CHIP-8 interpreter written in C++ and SFML
 
+[pong][pong]
+[pong]: https://github.com/2bit-hack/CHIPPER/img/pong.png
+
 ## Work In Progress
 
-## TODO
+### TODO
 
 * Implement audio
 * Implement 60hz frame perfect emulation
 * Test more ROMS
+
+### Build
+
+
+Make sure SFML is included in the compiler standard include path
+
+```
+make
+./chip [ROM name]
+```
+
+For a list of available ROMs, check the ```roms``` folder
+
+Run
+```
+make clean
+```
+to clean up
 
 ### Resources
 
