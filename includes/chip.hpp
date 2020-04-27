@@ -23,7 +23,7 @@ class Chip {
     // V0 - VF
     std::vector<Byte> m_registers;
     // possibly 12 - 16 levels of pushing
-    std::vector<Byte> m_stack;
+    std::vector<unsigned short> m_stack;
     int m_stackPointer;
     // 16 keys
     std::vector<bool> m_keys;
@@ -40,6 +40,7 @@ class Chip {
     Chip();
 
     void debug_dumpMem();
+    void debug_instructions(Opcode opcode);
 
     void loadFont();
     bool loadROM(std::string filepath);

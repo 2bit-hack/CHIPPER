@@ -45,6 +45,13 @@ void Chip::debug_dumpMem() {
     std::cout << "\n";
 }
 
+void Chip::debug_instructions(Opcode opcode) {
+    std::cout << "Opcode: " << std::hex << opcode << std::dec << "\n";
+    std::cout << "PC: " << std::hex << m_programCounter << std::dec << "\n";
+    std::cout << "I:  " << std::hex << m_indexRegister << std::dec << "\n";
+    std::cout << "SP: " << std::hex << m_stackPointer << std::dec << "\n\n";
+}
+
 // load CHIP-8 fontset into memory
 // memory from 0 to 512 is basically empty, so we use the first 80 bytes to
 // store this
@@ -90,7 +97,7 @@ bool Chip::loadROM(std::string filepath) {
         return true;
     } else {
         std::cerr << "Failed to load ROM\n";
-        // TODO: cleanup if necessary
+        exit(ROM_LOAD_ERR);
         return false;
     }
 }
@@ -112,6 +119,8 @@ void Chip::play() {
     Opcode opcode = (Opcode)((m_memory[m_programCounter] << 8) |
                              m_memory[m_programCounter + 1]);
 
+    debug_instructions(opcode);
+
     // decode and execute
     // get first nibble (half a byte, same as a single hex char)
     switch (opcode & 0xF000) {
@@ -132,8 +141,9 @@ void Chip::play() {
             // 00EE
             // Returns from a subroutine
 
-            m_programCounter = m_stack[--m_stackPointer];
-            m_programCounter += 2;
+            m_stackPointer--;
+            m_programCounter = m_stack[m_stackPointer];
+            // m_programCounter += 2;
 
             break;
         default:
@@ -157,6 +167,7 @@ void Chip::play() {
 
         NNN = opcode & 0x0FFF;
         m_stack[m_stackPointer] = m_programCounter;
+        m_stackPointer++;
         m_programCounter = NNN;
 
         break;

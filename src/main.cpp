@@ -7,12 +7,11 @@ int main() {
     if (!loaded)
         exit(ROM_LOAD_ERR);
 
-    // It works!
-    // chip->m_memory[0] = 0xab;
-    // chip->m_memory[1] = 0xcd;
-    // chip->play();
-
     chip->debug_dumpMem();
+
+    while (true) {
+        chip->play();
+    }
 
     return 0;
 }
