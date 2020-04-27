@@ -59,6 +59,8 @@ int main(int argc, char* argv[]) {
     if (!loaded)
         exit(ROM_LOAD_ERR);
 
+    // chip.debug_dumpMem();
+
     sf::RenderWindow window(
         sf::VideoMode(width * pixelScale, height * pixelScale), "CHIPPER");
 

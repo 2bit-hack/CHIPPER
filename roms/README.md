@@ -25,3 +25,8 @@ The ROMs included are as follows:
 * UFO
 * Vbrix
 * Wipeoff 
+
+There are also two test ROMs that helped me to debug my interpreter
+
+* test_opcode.ch8
+* BC_test.ch8

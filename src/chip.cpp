@@ -143,7 +143,7 @@ void Chip::play() {
 
             m_stackPointer--;
             m_programCounter = m_stack[m_stackPointer];
-            // m_programCounter += 2;
+            m_programCounter += 2;
 
             break;
         default:
@@ -422,13 +422,13 @@ void Chip::play() {
         for (int i = 0; i < height; i++) {
             pixelRow = m_memory[m_indexRegister + i];
             for (int j = 0; j < width; j++) {
-                // finding the x,y coordinate in the 1D framebuffer
-                // row major
-                int mapXYto1DArr = x + j + ((y + i) * 64);
                 // get each pixel in pixelRow
                 // 128b10 = 10000000b2
                 // we right shift from 0 to 7 to get each bit
                 if ((pixelRow & (0x0080 >> j)) != 0) {
+                    // finding the x,y coordinate in the 1D framebuffer
+                    // row major
+                    int mapXYto1DArr = (x + j + ((y + i) * 64)) % 0x0800;
                     if (m_frameBuffer[mapXYto1DArr]) {
                         // xor mode drawing
                         // if that pixel is 1, then collision occurs
@@ -438,7 +438,7 @@ void Chip::play() {
                         m_registers[0x000F] = 1;
                     }
                     m_frameBuffer[mapXYto1DArr] =
-                        (bool)m_frameBuffer[mapXYto1DArr] ^ 1;
+                        (bool)(m_frameBuffer[mapXYto1DArr] ^ 1);
                 }
             }
         }
