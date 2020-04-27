@@ -573,8 +573,15 @@ void Chip::play() {
             // FX29
             // Sets I to the location of the sprite for the character in VX.
             // Characters 0-F (in hexadecimal) are represented by a 4x5 font
+
+            X = (opcode & 0x0F00) >> 8;
+            // fonts are stored in memory from 0x0000 - 0x0080
+            // each character is stored in 5 bytes
+            m_indexRegister = m_registers[X] * 5;
+            m_programCounter += 2;
+
             break;
-        case 0x0003:
+        case 0x0003: {
             // FX33
             // Stores the binary-coded decimal representation of VX, with the
             // most significant of three digits at the address in I, the middle
@@ -582,7 +589,18 @@ void Chip::play() {
             // (In other words, take the decimal representation of VX, place the
             // hundreds digit in memory at location in I, the tens digit at
             // location I+1, and the ones digit at location I+2.)
-            break;
+
+            X = (opcode & 0x0F00) >> 8;
+            int VX = m_registers[X];
+            m_memory[m_indexRegister + 2] = VX % 10;
+            VX /= 10;
+            m_memory[m_indexRegister + 1] = VX % 10;
+            VX /= 10;
+            m_memory[m_indexRegister] = VX % 10;
+            m_programCounter += 2;
+        }
+
+        break;
         default:
             std::cerr << "Illegal opcode encountered! " << std::hex
                       << (int)opcode << std::dec << "\n";
@@ -597,5 +615,11 @@ void Chip::play() {
         break;
     }
 
-    // TODO: Timer updates
+    if (m_delayTimer > 0)
+        m_delayTimer--;
+
+    if (m_soundTimer > 0) {
+        // TODO: Implement sound
+        m_soundTimer--;
+    }
 }
