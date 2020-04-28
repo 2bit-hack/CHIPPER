@@ -119,7 +119,7 @@ void Chip::play() {
     Opcode opcode = (Opcode)((m_memory[m_programCounter] << 8) |
                              m_memory[m_programCounter + 1]);
 
-    // debug_instructions(opcode);
+    debug_instructions(opcode);
 
     // decode and execute
     // get first nibble (half a byte, same as a single hex char)
@@ -501,15 +501,14 @@ void Chip::play() {
 
             X = (opcode & 0x0F00) >> 8;
             bool isKeyPressed = false;
-            while (!isKeyPressed) {
-                for (int i = 0; i < 16; i++) {
-                    if (m_keys[i]) {
-                        m_registers[X] = (Byte)i;
-                        isKeyPressed = true;
-                    }
+            for (int i = 0; i < 16; i++) {
+                if (m_keys[i]) {
+                    m_registers[X] = (Byte)i;
+                    isKeyPressed = true;
                 }
             }
-            m_programCounter += 2;
+            if (isKeyPressed)
+                m_programCounter += 2;
         }
 
         break;

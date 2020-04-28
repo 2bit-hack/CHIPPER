@@ -72,7 +72,8 @@ int main(int argc, char* argv[]) {
     // chip.debug_dumpMem();
 
     sf::RenderWindow window(
-        sf::VideoMode(width * pixelScale, height * pixelScale), "CHIPPER");
+        sf::VideoMode(width * pixelScale, height * pixelScale),
+        "CHIPPER - " + std::string(argv[1]));
 
     while (window.isOpen()) {
         sf::Event event;
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
         chip.m_keys[0xF] = sf::Keyboard::isKeyPressed(mapKeys[0xF]);
 
         // TODO: change this to actually push a frame every 16.67ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     return 0;
