@@ -44,3 +44,4 @@ Z | X | C | V
 * [A collection of ROMs from Zophar's Domain](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html)
 * [A test ROM by corax89](https://github.com/corax89/chip8-test-rom)
 * [Another test ROM by BestCoder](https://slack-files.com/T3CH37TNX-F3RF5KT43-0fb93dbd1f)
+* [Audio by pan14, under Creative Commons](https://freesound.org/people/pan14/sounds/263133/)
