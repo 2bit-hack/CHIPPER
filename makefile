@@ -1,7 +1,7 @@
 CC=g++
 
 all: main.o chip.o
-	$(CC) -o chip main.o chip.o -lsfml-graphics -lsfml-window -lsfml-system
+	$(CC) -o chip main.o chip.o -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 main.o:
 	$(CC) -c src/main.cpp

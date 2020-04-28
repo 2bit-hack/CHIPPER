@@ -1,5 +1,8 @@
+#include <chrono>
+#include <thread>
 #include <unordered_map>
 
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
 #include "../includes/chip.hpp"
@@ -8,6 +11,8 @@ const int pixelScale = 10;
 const int width = 64;
 const int height = 32;
 
+sf::SoundBuffer buffer;
+sf::Sound beep;
 std::unordered_map<Byte, sf::Keyboard::Key> mapKeys;
 
 void mapKeysToKeyboard() {
@@ -50,6 +55,11 @@ int main(int argc, char* argv[]) {
         exit(ROM_LOAD_ERR);
     }
 
+    if (!buffer.loadFromFile("./sounds/beep.wav"))
+        std::cout << "Failed to load sound\n";
+    else
+        beep.setBuffer(buffer);
+
     mapKeysToKeyboard();
 
     std::string filepath = "./roms/" + std::string(argv[1]);
@@ -80,6 +90,9 @@ int main(int argc, char* argv[]) {
             window.display();
         }
 
+        if (chip.m_soundTimer)
+            beep.play();
+
         chip.m_keys[0x0] = sf::Keyboard::isKeyPressed(mapKeys[0x0]);
         chip.m_keys[0x1] = sf::Keyboard::isKeyPressed(mapKeys[0x1]);
         chip.m_keys[0x2] = sf::Keyboard::isKeyPressed(mapKeys[0x2]);
@@ -96,6 +109,9 @@ int main(int argc, char* argv[]) {
         chip.m_keys[0xD] = sf::Keyboard::isKeyPressed(mapKeys[0xD]);
         chip.m_keys[0xE] = sf::Keyboard::isKeyPressed(mapKeys[0xE]);
         chip.m_keys[0xF] = sf::Keyboard::isKeyPressed(mapKeys[0xF]);
+
+        // TODO: change this to actually push a frame every 16.67ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     return 0;

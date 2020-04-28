@@ -8,12 +8,6 @@ A CHIP-8 interpreter written in C++ and SFML
 
 ## Work In Progress
 
-### TODO
-
-* Implement audio
-* Implement 60hz frame perfect emulation
-* Test more ROMS
-
 ### Build
 
 
@@ -31,6 +25,16 @@ Run
 make clean
 ```
 to clean up
+
+### Keyboard
+
+1 | 2 | 3 | 4
+-------------
+Q | W | E | R
+-------------
+A | S | D | F
+-------------
+Z | X | C | V
 
 ### Resources
 

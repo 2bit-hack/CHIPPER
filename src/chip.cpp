@@ -630,7 +630,6 @@ void Chip::play() {
         m_delayTimer--;
 
     if (m_soundTimer > 0) {
-        // TODO: Implement sound
         m_soundTimer--;
     }
 }
