@@ -27,7 +27,7 @@ make clean
 to clean up
 
 ### Keyboard
-
+```
 1 | 2 | 3 | 4
 -------------
 Q | W | E | R
@@ -35,7 +35,7 @@ Q | W | E | R
 A | S | D | F
 -------------
 Z | X | C | V
-
+```
 ### Resources
 
 * [Cowgod's CHIP-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
