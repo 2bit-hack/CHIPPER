@@ -33,6 +33,39 @@ Chip::Chip() {
     m_drawFlag = false;
 }
 
+// same as the constructor, but for reseting
+void Chip::reset() {
+    m_memory.clear();
+    m_memory.resize(4096);
+
+    loadFont();
+
+    // setting up rng for opcode 0xCXNN
+    srand(time(NULL));
+
+    m_programCounter = 0x0200; // 512 bytes
+    m_indexRegister = 0;
+
+    m_registers.clear();
+    m_registers.resize(16);
+
+    m_stack.clear();
+    m_stack.resize(16);
+
+    m_stackPointer = 0;
+
+    m_keys.clear();
+    m_keys.resize(16);
+
+    m_frameBuffer.clear();
+    m_frameBuffer.resize(64 * 32);
+
+    m_delayTimer = 0;
+    m_soundTimer = 0;
+
+    m_drawFlag = false;
+}
+
 // dumps contents of memory to stdout
 // useful for quickly checking opcodes in a certain ROM
 void Chip::debug_dumpMem() {
@@ -119,7 +152,7 @@ void Chip::play() {
     Opcode opcode = (Opcode)((m_memory[m_programCounter] << 8) |
                              m_memory[m_programCounter + 1]);
 
-    debug_instructions(opcode);
+    // debug_instructions(opcode);
 
     // decode and execute
     // get first nibble (half a byte, same as a single hex char)

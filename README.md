@@ -6,8 +6,6 @@ A CHIP-8 interpreter written in C++ and SFML
 
 ![blinky](https://github.com/2bit-hack/CHIPPER/blob/master/img/blinky.png "blinky")
 
-## Work In Progress
-
 ### Build
 
 
@@ -15,8 +13,10 @@ Make sure SFML is included in the compiler standard include path
 
 ```
 make
-./chip [ROM name]
+./chip [ROM name] [?alt]
 ```
+
+Running with ```alt``` as a secondary optional argument renders the display with green and black
 
 For a list of available ROMs, check the ```roms``` folder
 
@@ -36,6 +36,9 @@ A | S | D | F
 -------------
 Z | X | C | V
 ```
+
+Pressing ```Backspace``` at any time will reset the emulation
+
 ### Resources
 
 * [Cowgod's CHIP-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)

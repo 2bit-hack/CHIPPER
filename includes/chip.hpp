@@ -42,6 +42,7 @@ class Chip {
     void debug_dumpMem();
     void debug_instructions(Opcode opcode);
 
+    void reset();
     void loadFont();
     bool loadROM(std::string filepath);
     void play();

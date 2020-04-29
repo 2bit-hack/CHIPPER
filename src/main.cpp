@@ -15,6 +15,9 @@ sf::SoundBuffer buffer;
 sf::Sound beep;
 std::unordered_map<Byte, sf::Keyboard::Key> mapKeys;
 
+auto primaryColor = sf::Color::White;
+auto secondaryColor = sf::Color::Black;
+
 void mapKeysToKeyboard() {
     mapKeys[0x1] = sf::Keyboard::Num1;
     mapKeys[0x2] = sf::Keyboard::Num2;
@@ -40,9 +43,9 @@ void drawToScreen(sf::RenderWindow& target, Chip& chip) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (chip.m_frameBuffer[(i * width) + j])
-                pixel.setFillColor(sf::Color::White);
+                pixel.setFillColor(primaryColor);
             else
-                pixel.setFillColor(sf::Color::Black);
+                pixel.setFillColor(secondaryColor);
             pixel.setPosition(j * pixelScale, i * pixelScale);
             target.draw(pixel);
         }
@@ -63,6 +66,14 @@ int main(int argc, char* argv[]) {
     mapKeysToKeyboard();
 
     std::string filepath = "./roms/" + std::string(argv[1]);
+
+    if (argc > 2) {
+        if (std::string(argv[2]) == std::string("alt")) {
+            primaryColor = sf::Color::Green;
+        } else {
+            std::cout << "Invalid color mode specified - using defaults\n";
+        }
+    }
 
     Chip chip;
     bool loaded = chip.loadROM(filepath);
@@ -110,6 +121,13 @@ int main(int argc, char* argv[]) {
         chip.m_keys[0xD] = sf::Keyboard::isKeyPressed(mapKeys[0xD]);
         chip.m_keys[0xE] = sf::Keyboard::isKeyPressed(mapKeys[0xE]);
         chip.m_keys[0xF] = sf::Keyboard::isKeyPressed(mapKeys[0xF]);
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace)) {
+            chip.reset();
+            bool loaded = chip.loadROM(filepath);
+            if (!loaded)
+                exit(ROM_LOAD_ERR);
+        }
 
         // TODO: change this to actually push a frame every 16.67ms
         // std::this_thread::sleep_for(std::chrono::milliseconds(1));
