@@ -110,7 +110,7 @@ void Chip::loadFont() {
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
-    for (int i = 0x0000; i <= 0x0050; i++) {
+    for (int i = 0x0000; i < 0x0050; i++) {
         m_memory[i] = chip8_fontset[i];
     }
 }
